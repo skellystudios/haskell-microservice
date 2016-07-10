@@ -36,7 +36,18 @@ import qualified Text.Blaze.Html
 
 
 type UserAPI1 = "users" :> Get '[JSON] [User]
+                :<|> "echo" :> Get '[PlainText] String
 
+
+server1 :: Server UserAPI1
+server1 = return users1
+          :<|> echo
+
+echo :: ExceptT ServantErr IO String
+echo = do
+  liftIO $ putStr "They want an answer, server. > "
+  str <- liftIO (getLine)
+  return str
 
 data User = User
   { name :: String
@@ -54,8 +65,6 @@ users1 =
   , User "Albert Einstein" 136 "ae@mc2.org"         (fromGregorian 1905 12 1) "lol"
   ]
 
-server1 :: Server UserAPI1
-server1 = return users1
 
 userAPI :: Proxy UserAPI1
 userAPI = Proxy
